@@ -81,7 +81,7 @@ def load_fileset(dataset, subset):
 
     return samplefiles, counts, data_vector
 
-def knn(dataSet, testSet):
+def knn(dataSet, testSet, k):
     """ given a [a x n] dataSet and a [b x n] testSet,
         returns a [b x 1] array of the closest indecies of
         the columns of testSet to columns in testSet;
@@ -103,13 +103,53 @@ def knn(dataSet, testSet):
 
         # copy the minimum distane index into testIndex
         
-        output_indices[testIndex] = np.argmin(
-            distances,
-            axis=0)
+        closest_k = []
+        max_distance = np.max(distances,axis=0)
+        for i in range(k):
+            closest_k.append(np.argmin(distances,axis=0))
+            distances[closest_k[-1]] += max_distance
+        
+        output_indices[testIndex] = closest_k[0]
 
     return output_indices
 
-def process_dataset(dataset):
+def map_to_csv(map_training_index_to_class,
+        map_testing_index_to_class,
+        closests):
+
+    # print the output into a nice csv format
+    # format:   real filename, real name, real gender,                  \ 
+    #           recognized filename, recognized name, recognized gender \
+    #           match on name, match on gender                          \
+
+    csv = ""
+
+    for input_index, recognized_index in enumerate(closests):
+        recognized_class = map_training_index_to_class(recognized_index)
+        input_class      = map_testing_index_to_class(input_index)
+
+        if recognized_class == None or input_class == None:
+            print("error mapping indcies back to values")
+            print("    recognized_index = %s" % recognized_index)
+            print("    input_index  = %s" % input_index)
+            sys.exit(1)
+
+        csv += (", ".join([
+            training_filenames[int(recognized_index)],
+            recognized_class["name"],
+            recognized_class["gender"],
+            testing_filenames[int(input_index)],
+            input_class["name"],
+            input_class["gender"],
+            "1" if input_class["name"] == recognized_class["name"] else "0",
+            "1" if input_class["gender"] == recognized_class["gender"] else "0",
+            ]))
+
+        csv += "\n"
+
+    return csv
+
+def process_dataset(dataset, range_k):
     # check that all the kinds have the right subfolders
     for kind in dataset:
         if not verify_set(
@@ -149,37 +189,23 @@ def process_dataset(dataset):
         print input_index, testing_counts
         return None
 
-    # perform the knn junk
-    closests = knn(training_set, testing_set)
 
-    # print the output into a nice csv format
-    # format:   real filename, real name, real gender,                  \ 
-    #           recognized filename, recognized name, recognized gender \
-    #           match on name, match on gender                          \
+    csv_outs = []
+    for k in range_k:
+        # perform the knn junk
+        closests = knn(training_set, testing_set, k)
 
-    for input_index, recognized_index in enumerate(closests):
-        recognized_class = map_training_index_to_class(recognized_index)
-        input_class      = map_testing_index_to_class(input_index)
+        # convert it to csvs
+        csv_outs.append(
+            map_to_csv(
+                map_training_index_to_class,
+                map_testing_index_to_class,
+                closests))
 
-        if recognized_class == None or input_class == None:
-            print("error mapping indcies back to values")
-            print("    recognized_index = %s" % recognized_index)
-            print("    input_index  = %s" % input_index)
-            sys.exit(1)
-
-        print(", ".join([
-            training_filenames[int(recognized_index)],
-            recognized_class["name"],
-            recognized_class["gender"],
-            testing_filenames[int(input_index)],
-            input_class["name"],
-            input_class["gender"],
-            "1" if input_class["name"] == recognized_class["name"] else "0",
-            "1" if input_class["gender"] == recognized_class["gender"] else "0",
-            ]))
+    return csv_outs
 
 
 
 
 if __name__ == "__main__":
-    process_dataset(data)
+    process_dataset(data, range(20))
