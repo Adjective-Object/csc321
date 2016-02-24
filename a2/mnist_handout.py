@@ -45,14 +45,15 @@ def cost(y, y_):
 
 
 def generalize_input_data(inputs):
-    const_inputs = empty((inputs.shape[0], 1))
+    ''' inputs: I x n matrix
+    '''
+    const_inputs = empty((inputs.shape[1], 1))
     const_inputs.fill(1)
-    return concatenate((const_inputs, inputs), axis=1)
+    return concatenate((const_inputs, inputs), axis=0)
 
 
 def generalize_biases(weights, biases):
     ''' weights:I x O matrix
-        inputs: n x I matrix
         biases: O x 1 matrix
     '''
     return concatenate((biases.reshape((1, weights.shape[1])), weights), axis=0)
@@ -67,13 +68,12 @@ def linear_layer(inputs, weights):
         input_dim: I
         output_dim: O
 
-        Inputs a n * I matrix of inputs
+        Inputs a  I * n matrix of inputs
         weights a I * O matrix of weights of each of the inputs
-        offsets a I * O matrix of weights of each of the inputs
-
+ 
         returns a n*O matrix of output matricies
     '''
-    return dot(inputs, weights)
+    return dot(weights.T, inputs)
 
 
 def part2(dataset):
