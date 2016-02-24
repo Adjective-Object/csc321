@@ -360,9 +360,10 @@ def tanh_layer(y, (W, b)):
     '''Return the output of a tanh layer for the input matrix y.
     y is an NxM matrix where N is the number of inputs for 
     a single case, and M is the number of cases'''
-    print "tanh", y.shape, W.shape
-    print "..", dot(y, W)
-    return tanh(dot(y, W) + tile(b, (1, y.shape[0])).T)
+    #print "tanh", W.T.shape, y.shape
+    #print "..", dot(W.T, y)
+    return tanh(dot(W.T, y)+b)
+
 
 def forward(x, (W0, b0), (W1, b1)):
     ''' Wx : weights of input
@@ -413,19 +414,18 @@ def approx_deriv_multilayer(
     print inp
     L0, _, output = forward(inp, (W0, b0), (W1, b1))
 
+    # quick test that vectoring works the way I want it to
     print output
-
-    for n in range(inp.shape[0]):
-        print inp[n].reshape(1, inp.shape[1])
+    for n in range(inp.shape[1]):
+        print "input %d" %(n), inp[:,n].reshape((2,1))
 
         _, _, outpoot = forward(
-            inp[n].reshape(1, inp.shape[1]),
+            inp[:,n].reshape((2,1)),
             (W0, b0), (W1, b1))
 
         print outpoot
 
     # augment the matricies (combine the biases with the weight matricies)
-
     augmented_input = generalize_input_data(inp)
     augmented_interlayer_input = generalize_input_data(L0)
 
@@ -490,17 +490,15 @@ def part7(dataset, snapshot):
 
     # 4 cases of 2 inputs
     inputs = array([
-        [1,1],
-        [2,2],
-        [3,3],
-        [4,4],
+        [1,3,5,7],
+        [2,4,6,8],
         ])
     print inputs.shape
 
     # broadcast 2 inputs to 3 hidden
     W0 = array([
         [0.1, 0.2, 0.3],
-        [0.7, 0.2, 0.4],
+        [0.1, 0.2, 0.3],
         ])
     print W0.shape
 
@@ -548,7 +546,8 @@ def main():
 
     # #Load sample weights for the multilayer neural network
     snapshot = cPickle.load(open("snapshot50.pkl"))
-    # W0 = snapshot["W0"]
+    W0 = snapshot["W0"]
+    print "weight 0 shape", W0.shape
     # b0 = snapshot["b0"].reshape((300,1))
     # W1 = snapshot["W1"]
     # b1 = snapshot["b1"].reshape((10,1))
