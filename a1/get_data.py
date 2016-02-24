@@ -13,10 +13,10 @@ import urllib
 import sys
 from PIL import Image
 
+from threading import Thread
 
-act = ['Gerard Butler', 'Daniel Radcliffe', 'Michael Vartan', 'Lorraine Bracco',
-        'Peri Gilpin', 'Angie Harmon']
-
+thread_ct = 0
+MAX_THREADS = 100
 
 def timeout(func, args=(), kwargs={}, timeout_duration=1, default=None):
     '''From:
@@ -77,7 +77,29 @@ def processImage(local_file_in, local_file_out, face_coords, bounds_ratio):
             (local_file_in, local_file_out, face_coords))
 
 
+def make_actor_dirs(localpath, actor_name):
+    print "making actor dirs for %s in %s" % (actor_name, localpath)
+    name = actor_name.replace(" ","_")
+
+    dir_unprocessed = os.path.join(localpath, "unprocessed")
+    dir_processed = os.path.join(localpath, "processed")
+    if not os.path.exists(dir_unprocessed):
+        os.mkdir(dir_unprocessed)
+    if not os.path.exists(dir_processed):
+        os.mkdir(dir_processed)
+
+    actor_dirname = os.path.join(dir_unprocessed, name)
+    if not os.path.exists(actor_dirname):
+        os.mkdir(actor_dirname)
+
+    actor_dirname = os.path.join(dir_processed, name)
+    if not os.path.exists(actor_dirname):
+        os.mkdir(actor_dirname)
+
+
 def doAll(path, localpath):
+
+    seen_actors = set()
 
     bounds_ratio = 0.0
     smallest_width = -1
@@ -93,25 +115,7 @@ def doAll(path, localpath):
             smallest_width = width
 
     print "bounds_ratio: %s, width:%spx"%(bounds_ratio, smallest_width)
-    
-    for a in act:
 
-        name = a.replace(" ","_")
-
-        dir_unprocessed = os.path.join(localpath, "unprocessed")
-        dir_processed = os.path.join(localpath, "processed")
-        if not os.path.exists(dir_unprocessed):
-            os.mkdir(dir_unprocessed)
-        if not os.path.exists(dir_processed):
-            os.mkdir(dir_processed)
-
-        actor_dirname = os.path.join(dir_unprocessed, name)
-        if not os.path.exists(actor_dirname):
-            os.mkdir(actor_dirname)
-
-        actor_dirname = os.path.join(dir_processed, name)
-        if not os.path.exists(actor_dirname):
-            os.mkdir(actor_dirname)
 
     for i,line in enumerate(open(path), 1):
         # A version without timeout (uncomment in case you need to 
@@ -122,37 +126,46 @@ def doAll(path, localpath):
         #  helper variables
         spl = line.split("\t")
         person_name = spl[0]
-        if person_name in act:
-            person_name = person_name.replace(" ","_")
-            face_coords = map(lambda a: int(a), spl[4].split(","))
-            url = spl[3]
-            extension = url.split('.')[-1]
 
-            local_file = os.path.join(
-                person_name, str(i) + "." + extension)
-            local_file_full = os.path.join(
-                localpath, "unprocessed", local_file)
+        if person_name not in seen_actors:
+            seen_actors.add(person_name)
+            make_actor_dirs(localpath, person_name)
 
-            print local_file_full
+        person_name = person_name.replace(" ","_")
+        face_coords = map(lambda a: int(a), spl[4].split(","))
+        url = spl[3]
+        extension = url.split('.')[-1]
 
-            #load the file with timeout
-            timeout(testfile.retrieve, 
-                (url, local_file_full), {}, 1000)
+        local_file = os.path.join(
+            person_name, str(i) + "." + extension)
+        local_file_full = os.path.join(
+            localpath, "unprocessed", local_file)
 
-            # on fail, print msg and continue
-            if not os.path.isfile(local_file_full):
-                print "..fetching file failed <%s>"%(url)
+        # print local_file_full
 
-            # otherwise, process the image
-            else:
-                # print("processing " + local_file)
-                print url, face_coords
-                processImage(
-                    local_file_full,
-                    os.path.join(localpath, "processed", local_file),
-                    face_coords, bounds_ratio)
+        #load the file with timeout
+        timeout(testfile.retrieve, 
+            (url, local_file_full), {}, 0.1)
+
+        # on fail, print msg and continue
+        if not os.path.isfile(local_file_full):
+            print "..fetching file failed <%s>"%(url)
+
+        # otherwise, process the image
+        else:
+            # print("processing " + local_file)
+            # print url, face_coords
+
+            processImage(
+                local_file_full,
+                os.path.join(localpath, "processed", local_file),
+                face_coords, bounds_ratio)
 
 
 # print "created processed/%s"%(local_file)
 if __name__ == "__main__":
+    if len(sys.argv) < 3:
+        print "usage: %s <data file> <local path>"
+        sys.exit(1)
+
     doAll(sys.argv[1], sys.argv[2])

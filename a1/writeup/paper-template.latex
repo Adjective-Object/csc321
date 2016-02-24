@@ -1,6 +1,7 @@
 \documentclass[$if(fontsize)$$fontsize$,$endif$$if(lang)$$lang$,$endif$$if(papersize)$$papersize$,$endif$$for(classoption)$$classoption$$sep$,$endfor$]{$documentclass$}
 \usepackage{amsmath}
 \usepackage{blkarray}
+\usepackage{pgfplots}
 \newcommand{\norm}[1]{\left\lVert#1\right\rVert}
 \usepackage{tikz}
 \usetikzlibrary{arrows,shapes}
