@@ -525,10 +525,11 @@ def grad_multilayer((W0, b0), (W1, b1), inp, expected_output):
     # dL1dW1 = tile(dL1dW1.reshape((H, 1, O)), (1, O, 1))
     # dCdW1 = dot(dL1dW1, dCdL1)
 
-    dCdW1 = dot(L0, ((1- L1**2)*dCdL1).T)
-    dCdW1 = tile(reshape(dCdW1, (H, O, 1)), (1, 1, N))
+    # tanh not necessary on last level, really
+    # because of the softmax function
+    dCdW1 = dot(L0, dCdL1.T)
 
-    print "L0:", L0.shape, "L1:", L1.shape
+    print "L0:", L0.shape, "L1:", L1.shape, (L1**2).shape
     print "dCdW1:", dCdW1.shape
 
     print dCdL1.shape
@@ -539,8 +540,7 @@ def grad_multilayer((W0, b0), (W1, b1), inp, expected_output):
     ######################
 
     dL1dL0 = W1
-    # b0 is 1:1 with L1
-    dCdb0 = dL1dL0 * dCdL1
+    dCdb0 = dot(dL1dL0, dCdL1)
 
     dL0dW0 = dot(inp, sech2(M0).T)
     # expand it to have entries for every entry in weight matrix
