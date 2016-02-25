@@ -496,6 +496,7 @@ def grad_multilayer((W0, b0), (W1, b1), inp, expected_output):
 
     '''
 
+    # convenience variables
     N, I = inp.shape
     H = W0.shape[1]
     O = W1.shape[1]
@@ -507,53 +508,48 @@ def grad_multilayer((W0, b0), (W1, b1), inp, expected_output):
     expected_output = expected_output.T
 
     # run through the neural network
-    L0, L1, C = forward(inp, (W0, b0), (W1,b1))
+    L0, L1, prediction = forward(inp, (W0, b0), (W1,b1))
     M0, M1 = dot(W0.T, inp), dot(W1.T, L0)
 
     #############################
     # change in cost wrt output #
     #############################
-    dCdL1 = C - expected_output
+    dCdL1 = prediction - expected_output
+    dCdL0 = dot(W1, dCdL1) # dL1dL0 = W1
 
-    ####################
-    # do the 2nd Layer #
-    ####################
+    gradients_W1 = empty((W1.shape[0], W1.shape[1], N))
+    gradients_W0 = empty((W0.shape[0], W0.shape[1], N))
+    gradients_b1 = dCdL1
+    gradients_b0 = dCdL0
 
-    # # This code doesn't work, just use the provided functoins prolly
-    # dL1dW1 = dot(L0, sech2(M1).T)
-    # # expand it to have entries for every entry in weight matrix
-    # dL1dW1 = tile(dL1dW1.reshape((H, 1, O)), (1, O, 1))
-    # dCdW1 = dot(dL1dW1, dCdL1)
+    # print gradients_W1.shape
+    # print gradients_W0.shape
+    # print gradients_b1.shape
+    # print gradients_b0.shape
 
-    # tanh not necessary on last level, really
-    # because of the softmax function
-    dCdW1 = dot(L0, dCdL1.T)
+    for n in range(N):
+        ####################
+        # do the 2nd Layer #
+        ####################
+        this_dCdL1 = dCdL1[:, n]
 
-    print "L0:", L0.shape, "L1:", L1.shape, (L1**2).shape
-    print "dCdW1:", dCdW1.shape
+        # dL1 dW1 is the stacked tiles. sec2h to undo the nonlinear layer
+        dL1dW1 = sech2(tile(L1[:, n], (O, 1)))
+        dCdW1 = dot(this_dCdL1, dL1dW1)
 
-    print dCdL1.shape
-    dCdb1 = dCdL1 # b1 is 1:1 with L1
+        gradients_W1[:, :, n] = dCdW1
 
-    ######################
-    # Do the First Layer #
-    ######################
+        ######################
+        # Do the First Layer #
+        ######################
+        this_dCdL0 = dCdL0[:, n]
 
-    dL1dL0 = W1
-    dCdb0 = dot(dL1dL0, dCdL1)
+        dL0dW0 = sech2(tile(L0[:, n], (H, 1)))
+        dCdW0 = dot(dL0dW0, this_dCdL0)
 
-    dL0dW0 = dot(inp, sech2(M0).T)
-    # expand it to have entries for every entry in weight matrix
-    dL0dW0 = tile(dL0dW0.reshape((I, 1, H)), (1, H, 1))
-    # print "dL0dW0", dL0dW0.shape
-    dL1dW0 = dot(dL0dW0, dL1dL0)
-    # print "dL1dW0", dL1dW0.shape
-    dCdW0 = dot(dL1dW0, dCdL1)
+        gradients_W0[:,:,n] = dCdW0
 
-
-    print "dCdW0", dCdW0.shape, "dCdb0", dCdb0.shape
-
-    return (dCdW0, dCdb0), (dCdW1, dCdb1), C
+    return (gradients_W0, gradients_b0), (gradients_W1, gradients_b1), prediction
 
 
 
@@ -888,12 +884,14 @@ def make_digit_sample_9(dataset, matches):
     while num_failures < 10 and num_succ < 20:
         i = randint(0, inputs.shape[0]-1)
 
+        case = raw_data[i]
+
         if not matches[i] and num_failures < 10:
-            imsave("multilayer_failure_%dpng" % num_failures, case.reshape((28,28)))
+            imsave("multilayer_failure_%d.png" % num_failures, case.reshape((28,28)))
             num_failures+=1
 
         if matches[i] and num_succ < 20:
-            imsave("multilayer_succ_%dpng" % num_failures, case.reshape((28,28)))
+            imsave("multilayer_succ_%d.png" % num_failures, case.reshape((28,28)))
             num_succ+=1
 
 
@@ -947,13 +945,13 @@ def main():
     # Part 7 -
 
     # Part 8 - Approximating the gradient for a multilayer network
-    part8_gen_calc(M, snapshot, 10)
+    # part8_gen_calc(M, snapshot, 10)
     # part8_gen_approx(M, snapshot, 10)
-    part8_compare()
+    # part8_compare()
 
 
     # Part 9 - training with the multilayer network
-    # part9(M, snapshot)
+    part9(M, snapshot)
 
 
     ##################################################################
