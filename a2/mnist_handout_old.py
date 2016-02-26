@@ -27,8 +27,8 @@ def write(*xs):
 
     sys.stdout.flush()
 
-def sech2 (x):
-    return (sinh(x)/cosh(x)) ** 2
+def dtanh(y):
+    return 1.0 - (y** 2)
 
 
 
@@ -85,15 +85,22 @@ def linear_layer(inputs, weights):
         weights a I * O matrix of weights of each of the inputs
 
         returns a n*O matrix of output matricies
+
+        inputs should be generalized s.t. biases are the first index of the
+        thing
     '''
+
     return dot(inputs, weights)
 
+def part1(dataset):
+    for i in range(0,10):
+        for j in range(0,10):
+            imsave(
+                "writeup/part1/%d_%d.png"%(i,j),
+                dataset["test%d"%i][j].reshape((28,28)),
+                format="png", cmap=cm.gray)
 
-def tanh_layer(inputs, weights):
-    ''' Deal with the bias in a combined matrix
 
-    '''
-    return tanh(dot(inputs[:,1:], weights[1:])) + weights[0]
 
 def part2(dataset):
     ''' dataset is the MNIST digit data
@@ -137,40 +144,26 @@ def part2(dataset):
 # Gradient of the cost
 #
 
-def neg_log_liklihood(target, probabilities):
-    ''' Something something calculate log liklihood
+def neg_log_likelihood(target, probabilities):
+    ''' Something something calculate log likelihood
     '''
     return cost(probabilities.T, target.T)
 
-def grad_neg_log_liklihood(inp, weights, targets):
-    '''
-        inp: n * I array
-        weights: I x O array
-        targets: n * O array
-    '''
+def grad_neg_log_likelihood(inp, weights, targets):
     N, _ = inp.shape
     I, O = weights.shape
 
-    print inp.shape, weights.shape
-
-    output = empty((N, O))
     output = linear_layer(inp.reshape((N, I)), weights)
 
-    # print "output:", output.shape
     probability = softmax(output)
-    # print "probability:", probability.shape
     pdiffs = (probability - targets)
-    # print pdiffs.shape
     pdiffs = tile(pdiffs.reshape((N, 1, O)), (1, I, 1))
-    # print pdiffs.shape
     inp_expanded = inp.reshape((N, I, 1))
     inp_expanded = tile(inp_expanded, (1, 1, O))
 
-    gradient = pdiffs * inp_expanded
+    return pdiffs * inp_expanded
 
-    return gradient
-
-def approx_grad_neg_log_lklihood(inp, weights, targets, step=0.005):
+def approx_grad_neg_log_likelihood(inp, weights, targets, step=0.005):
     '''
         inp: n * I array
         weights: I x O array
@@ -191,12 +184,12 @@ def approx_grad_neg_log_lklihood(inp, weights, targets, step=0.005):
             new_weights = weights.copy()
 
             new_weights[i,o] = weights[i,o] - step
-            cost_right = neg_log_liklihood(
+            cost_right = neg_log_likelihood(
                 targets,
                 softmax(linear_layer(inp, new_weights)))
 
             new_weights[i,o] = weights[i,o] + step
-            cost_left = neg_log_liklihood(
+            cost_left = neg_log_likelihood(
                 targets,
                 softmax(linear_layer(inp, new_weights)))
 
@@ -213,7 +206,7 @@ def approx_grad_neg_log_lklihood(inp, weights, targets, step=0.005):
 
 def part3(dataset):
     # push through the linear layer
-    #outputs = grad_neg_log_liklihood(
+    #outputs = grad_neg_log_likelihood(
     #    inputs, weights, offsets, expected_output)
 
     inputs = array([
@@ -235,7 +228,7 @@ def part3(dataset):
 
     g_in = generalize_input_data(inputs)
     g_wt = generalize_biases(fakeWeights, fake_biases)
-    grad_neg_log_liklihood(
+    grad_neg_log_likelihood(
         g_in, g_wt, fake_expected_output)
 
 
@@ -281,7 +274,7 @@ def part4(dataset):
     g_wt = generalize_biases(weights, offsets)
 
     print "grad"
-    gradients = grad_neg_log_liklihood(g_in, g_wt, expected_output)
+    gradients = grad_neg_log_likelihood(g_in, g_wt, expected_output)
     print "approx grad"
     approx_gradients = approx_grad_neg_log_lklihood(g_in, g_wt, expected_output)
 
@@ -335,7 +328,7 @@ def part5(dataset):
         g_in = generalize_input_data(this_batch)
 
         #calculate the gradients for all of the inputs
-        gradients = grad_neg_log_liklihood(g_in, g_wt, this_batch_out)
+        gradients = grad_neg_log_likelihood(g_in, g_wt, this_batch_out)
         average_gradient = np.mean(gradients, axis=0)
 
         test_results.append(part5_test(dataset, g_wt))
@@ -444,14 +437,11 @@ def part6():
 
     # sum the weights of the pixels
     for i in range(weights.shape[1]):
-        fname = "./part6_%s.png" % i
+        fname = "writeup/part6/part6_%s.png" % i
         print "saving", fname
 
         this_digit = weights[:, i].reshape((28,28))
-
-        fig = plt.figure()
-        imshow(this_digit, cmap=cm.coolwarm)
-        plt.savefig(fname, format='png')
+        imsave(fname, this_digit, cmap=cm.coolwarm)
 
 
 
@@ -509,47 +499,19 @@ def grad_multilayer((W0, b0), (W1, b1), inp, expected_output):
 
     # run through the neural network
     L0, L1, prediction = forward(inp, (W0, b0), (W1,b1))
-    M0, M1 = dot(W0.T, inp), dot(W1.T, L0)
 
-    #############################
-    # change in cost wrt output #
-    #############################
-    dCdL1 = prediction - expected_output
-    dCdL0 = dot(W1, dCdL1) # dL1dL0 = W1
+    # calculate the gradient
+    dCdL1 = (prediction - expected_output)
+    dL1dL0 = dtanh(W1)
+    dCdL0 = dot(dL1dL0, dCdL1)
 
-    gradients_W1 = empty((W1.shape[0], W1.shape[1], N))
-    gradients_W0 = empty((W0.shape[0], W0.shape[1], N))
-    gradients_b1 = dCdL1
-    gradients_b0 = dCdL0
+    dL1dW1 = dtanh(L0)  # L1 = tanh(dot(W1, L0))
+    dL0dW0 = dtanh(inp) # L0 = tanh(dot(W0, inp)
 
-    # print gradients_W1.shape
-    # print gradients_W0.shape
-    # print gradients_b1.shape
-    # print gradients_b0.shape
+    gradients_W1 = dCdL1.reshape((1, O, N)) * dL1dW1.reshape((H, 1, N))
+    gradients_W0 = dCdL0.reshape((1, H, N)) * dL0dW0.reshape((I, 1, N))
 
-    for n in range(N):
-        ####################
-        # do the 2nd Layer #
-        ####################
-        this_dCdL1 = dCdL1[:, n]
-
-        # dL1 dW1 is the stacked tiles. sec2h to undo the nonlinear layer
-        dL1dW1 = sech2(tile(L1[:, n], (O, 1)))
-        dCdW1 = dot(this_dCdL1, dL1dW1)
-
-        gradients_W1[:, :, n] = dCdW1
-
-        ######################
-        # Do the First Layer #
-        ######################
-        this_dCdL0 = dCdL0[:, n]
-
-        dL0dW0 = sech2(tile(L0[:, n], (H, 1)))
-        dCdW0 = dot(dL0dW0, this_dCdL0)
-
-        gradients_W0[:,:,n] = dCdW0
-
-    return (gradients_W0, gradients_b0), (gradients_W1, gradients_b1), prediction
+    return (gradients_W0, dCdL0), (gradients_W1, dCdL1), prediction
 
 
 
@@ -612,13 +574,13 @@ def approx_grad_multilayer(
         numdone = int((o*1.0/O)*30)
         for h in range(H):
             W1_copy = copy(W1)
-            W1_copy[0] += step
+            W1_copy[h, o] += step
             cost_right = cost(
                 softmax(_tanh_layer(L0, (W1_copy, b1))),
                 expected_output)
 
             W1_copy = copy(W1)
-            W1_copy[0] -= step
+            W1_copy[h, o] -= step
             cost_left = cost(
                 softmax(_tanh_layer(L0, (W1_copy, b1))),
                 expected_output)
@@ -785,13 +747,13 @@ def part8_compare():
         [W0_calc,   b0_calc,   W1_calc,   b1_calc   ],
         [W0_approx, b0_approx, W1_approx, b1_approx]):
 
-        diffs = approx.flatten() - calc.flatten()
+        approx -= calc
 
         fig = plt.figure()
-        plt.hist(diffs, 50)
-        plt.title("difference between approximate %s and actual" % name)
+        plt.hist(approx.flatten(), 50)
+        print "writing difference_histogram_%s.png"%name
+        plt.title("approximate vs calculated cost for values in %s" % name)
         plt.savefig("difference_histogram_%s.png"%name, format="png")
-
 
 
 
@@ -807,19 +769,18 @@ def part9(dataset, snapshot):
     W0, b0 = snapshot["W0"], snapshot["b0"].reshape((300, 1))
     W1, b1 = snapshot["W1"], snapshot["b1"].reshape((10, 1))
 
+    # print "dims", W0.shape, b0.shape, W1.shape, b1.shape
 
-    batchsize = 100
+    batchsize = 50
     rates = []
     for lower, higher in zip(range(0,1001,batchsize), range(batchsize, 1001, batchsize)):
         print "training multilayer batch %d to %d of 1000" % (lower, higher)
-        # print "dims", W0.shape, b0.shape, W1.shape, b1.shape
 
         inputs, expected_outputs = load_samples(dataset, "train", lower, higher)
         (gW0, gb0), (gW1, gb1), outputs = grad_multilayer(
             (W0, b0), (W1, b1), inputs, expected_outputs)
 
-        # print "dims", gW0.shape, gb0.shape, gW1.shape, gb1.shape
-
+        # print gW0.shape, gb0.shape, gW1.shape, gb1.shape
         gW0 = mean(gW0, axis=2)
         gb0 = mean(gb0, axis=1).reshape(300, 1)
 
@@ -830,7 +791,7 @@ def part9(dataset, snapshot):
 
         thisRate, _ = get_rates_part9(dataset, (W0, b0), (W1, b1))
         rates.append(thisRate)
-        print "rate: %s" % rates[-1]
+        print "success rate: %s" % rates[-1]
 
         W0 -= gW0 * 0.01
         b0 -= gb0 * 0.01
@@ -840,39 +801,39 @@ def part9(dataset, snapshot):
     finalRate, matches = get_rates_part9(dataset, (W0, b0), (W1, b1))
     rates.append(finalRate)
 
-    make_digit_sample_9(dataset, matches)
-
-
-    print rates
-
+    np.save("final_network_W0", W0)
+    np.save("final_network_b0", b0)
+    np.save("final_network_W1", W1)
+    np.save("final_network_b1", b1)
 
     # draw the curve
     fig = plt.figure()
 
     ax = fig.add_subplot(1,1,1)
-    ax.set_title("learning curve for thing")
-    ax.set_ylim(top=1.5)
+    ax.set_title("learning curve for the multilayer neural network")
+    ax.set_ylim(top=1.0)
     ax.plot(rates)
 
     plt.savefig("./multilayer_learning_curve.png", format='png')
 
-    print rates
+    make_digit_sample_9(dataset, matches)
 
 
 def get_rates_part9(dataset, (W0, b0), (W1, b1)):
     # g_in = np.load("part5.arr")
-    inputs, expected_outputs = load_samples(dataset, "test", 0, 10000)
+    inputs, expected_outputs = load_samples(dataset, "train", 0, 1000)
     # print inputs.shape, expected_outputs.shape
     # print W0.shape
     _, _, outputs = forward(inputs.T, (W0, b0), (W1, b1))
     # print outputs, expected_outputs
     expected_outputs = argmax(expected_outputs.T, axis=0)
     outputs = argmax(outputs, axis=0)
-    # print expected_outputs.shape, outputs.shape
+    #print expected_outputs.shape, outputs.shape
 
     succCases = expected_outputs - outputs
-    # print succCases
-    rate = 1.0 - (float(count_nonzero(succCases)) / expected_outputs.size)
+    #print outputs
+    #print expected_outputs
+    rate = 1.0 - (float(count_nonzero(succCases)) / succCases.size)
 
     return rate, succCases
 
@@ -882,9 +843,9 @@ def make_digit_sample_9(dataset, matches):
     num_failures = 0
     num_succ = 0
     while num_failures < 10 and num_succ < 20:
-        i = randint(0, inputs.shape[0]-1)
+        i = randint(0, len(matches) - 1)
 
-        case = raw_data[i]
+        case = inputs[i]
 
         if not matches[i] and num_failures < 10:
             imsave("multilayer_failure_%d.png" % num_failures, case.reshape((28,28)))
@@ -893,6 +854,20 @@ def make_digit_sample_9(dataset, matches):
         if matches[i] and num_succ < 20:
             imsave("multilayer_succ_%d.png" % num_failures, case.reshape((28,28)))
             num_succ+=1
+
+
+
+#
+# Part 10
+#
+
+def part10():
+    W0 = np.load("final_network_W0.npy")
+
+    for n in range(W0.shape[1]):
+        imsave("writeup/part10/%03d.png"%(n),
+                W0[:, n].reshape((28,28)),
+                format='png', cmap=cm.coolwarm)
 
 
 
@@ -923,36 +898,37 @@ def main():
     # #get the index at which the output is the largest
     # y = argmax(output)
 
-    #part5(M)
-    # part6()
+    # Part 1 - drawing the dataset
+    # part1(M)
 
-    #part8_gen_approx(M, snapshot, 1)
-    #part8_gen_calc(M, snapshot, 1)
-    #part8_compare()
+    # Part 2 - calculating the network
+    # part2(M)
 
-    # Part 2 -
+    # Part 3 - calculating the gradient
+    # part3(M)
 
-    # Part 3 -
-
-    # Part 4 -
+    # Part 4 - approxmating the gradient
     # part4(M)
 
-    # Part 5 -
+    # Part 5 - Use 1 layer network
     # part5(M)
 
-    # Part 6 -
+    # Part 6 - Vidualize 1 layer network
+    # part6()
 
-    # Part 7 -
+    # Part 7 - Computing the gradient
+    # part7(M)
 
     # Part 8 - Approximating the gradient for a multilayer network
     # part8_gen_calc(M, snapshot, 10)
     # part8_gen_approx(M, snapshot, 10)
     # part8_compare()
 
-
     # Part 9 - training with the multilayer network
     part9(M, snapshot)
 
+    # Part 10 - visualizing the 2nd layer of the multilayer network
+    part10()
 
     ##################################################################
     # Code for displaying a feature from the weight matrix mW
