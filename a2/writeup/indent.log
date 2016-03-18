@@ -1,0 +1,27 @@
+Sat Feb 27 14:26:32 2016
+latexindent.pl version 2.1R, a script to indent .tex files
+latexindent.pl lives here: /home/adjective/School/321/assignments/a2/writeup/
+
+Modules are being loaded from the following directories:
+ 	/nix/store/s5hmy8kv1w151a1z4wy57csla3c11jr9-perl-5.20.3/lib/perl5/5.20.3/FindBin.pm
+	/nix/store/f8fj3v3r4c9qc5qnrrfjgxln1igajx19-perl-YAML-Tiny-1.69/lib/perl5/site_perl/5.20.3/YAML/Tiny.pm
+	/nix/store/s5hmy8kv1w151a1z4wy57csla3c11jr9-perl-5.20.3/lib/perl5/5.20.3/File/Copy.pm
+	/nix/store/s5hmy8kv1w151a1z4wy57csla3c11jr9-perl-5.20.3/lib/perl5/5.20.3/File/Basename.pm
+	/nix/store/s5hmy8kv1w151a1z4wy57csla3c11jr9-perl-5.20.3/lib/perl5/5.20.3/Getopt/Long.pm
+	/nix/store/q8ig0m6nwagj3f5c7gkvfh3jyrx5ykzr-perl-File-HomeDir-1.00/lib/perl5/site_perl/5.20.3/File/HomeDir.pm
+Directory for backup files and indent.log: .
+Reading defaultSettings.yaml from /home/adjective/School/321/assignments/a2/writeup/defaultSettings.yaml
+
+Home directory is /home/adjective
+To specify user settings you would put indentconfig.yaml here: 
+	/home/adjective/indentconfig.yaml
+
+Alternatively, you can use the hidden file .indentconfig.yaml as: 
+	/home/adjective/.indentconfig.yaml
+
+Just out put to the terminal :)
+
+Line Count of .writeup.tex: 641
+Line Count of indented .writeup.tex: 641
+
+Line counts of original file and indented file match

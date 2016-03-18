@@ -21,6 +21,11 @@ with import <nixpkgs> {}; {
           lmodern
         ];})
       fswatch
+
+      # latex formatting
+      perl
+      perlPackages.YAMLTiny
+      perlPackages.FileHomeDir
     ];
     LIBRARY_PATH="${libxml2}/lib";
     shellHook = ''
