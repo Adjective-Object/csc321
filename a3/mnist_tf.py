@@ -18,7 +18,7 @@ from scipy.io import loadmat
 
 t = int(time.time())
 #t = 1454219613
-print "t=", t
+print("t=", t)
 random.seed(t)
 
 
@@ -133,12 +133,12 @@ for i in range(5000):
   
   
   if i % 1 == 0:
-    print "i=",i
-    print "Test:", sess.run(accuracy, feed_dict={x: test_x, y_: test_y})
+    print("i=",i)
+    print("Test:", sess.run(accuracy, feed_dict={x: test_x, y_: test_y}))
     batch_xs, batch_ys = get_train(M)
 
-    print "Train:", sess.run(accuracy, feed_dict={x: batch_xs, y_: batch_ys})
-    print "Penalty:", sess.run(decay_penalty)
+    print("Train:", sess.run(accuracy, feed_dict={x: batch_xs, y_: batch_ys}))
+    print("Penalty:", sess.run(decay_penalty))
 
 
     snapshot = {}
