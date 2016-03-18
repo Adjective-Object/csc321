@@ -42,7 +42,7 @@ def get_sample_files(dataset, subset, batch_low, batch_high):
             yield os.path.join(subsetDir, path), class_index
 
 
-def load_fileset(dataset, subset, batch_low, batch_high):
+def load_fileset(dataset, subset, batch_low=0, batch_high=None):
     samplefiles = list(get_sample_files(dataset, subset, batch_low, batch_high))
 
     # create some empty matricies for inputs / expected outputs
@@ -55,6 +55,11 @@ def load_fileset(dataset, subset, batch_low, batch_high):
         img = imread(imgpath, flatten=True).flatten()
         input_vector[i, :] = img
         output_vector[i, class_index] = 1;
+
+    # print [s.split("/")[-3] for s, _ in samplefiles]
+    # print output_vector
+
+    input_vector = input_vector / 255.0
 
     return samplefiles, input_vector, output_vector
 

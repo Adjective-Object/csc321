@@ -24,7 +24,6 @@ num_classes = 6
 
 inputs = tf.placeholder(tf.float32, [None, img_size])
 
-
 # linear layer 0, input (32x32 -> num hidden)
 W0 = tf.Variable(tf.random_normal([img_size, nhid], stddev=0.01))
 b0 = tf.Variable(tf.random_normal([nhid], stddev=0.01))
@@ -37,18 +36,15 @@ b1 = tf.Variable(tf.random_normal([num_classes], stddev=0.01))
 layer1 = tf.nn.tanh(tf.matmul(inputs, W0)+b0)
 layer2 = tf.matmul(layer1, W1)+b1
 
-# softmaxing the output layer
+# softmaxing the output layer & comparing it with the expected values
 prediction = tf.nn.softmax(layer2)
 expectation = tf.placeholder(tf.float32, [None, num_classes])
-
-
 
 lam = 0.00000
 decay_penalty =lam*tf.reduce_sum(tf.square(W0))+lam*tf.reduce_sum(tf.square(W1))
 NLL = -tf.reduce_sum(expectation*tf.log(prediction)+decay_penalty)
 
-train_step = tf.train.GradientDescentOptimizer(0.005).minimize(NLL)
-
+train_step = tf.train.GradientDescentOptimizer(0.0005).minimize(NLL)
 
 init = tf.initialize_all_variables()
 sess = tf.Session()
