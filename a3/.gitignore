@@ -1,0 +1,6 @@
+*.pyc
+*.pkl
+*.swo
+*.swp
+actors
+actresses

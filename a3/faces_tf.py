@@ -1,3 +1,10 @@
+# helpers for loading face shit
+import face_utils
+
+import io
+import json
+
+
 from pylab import *
 import numpy as np
 import matplotlib.pyplot as plt
@@ -13,57 +20,67 @@ from numpy import random
 import tensorflow as tf
 
 import os
-from scipy.io import loadmat
 
 
-# helpers for loading face shit
-import face_utils
+import pickle
 
 random.seed(555)
 
 
+from faces_network import *
 
 
-
-
-
-
-lam = 0.00000
-decay_penalty =lam*tf.reduce_sum(tf.square(W0))+lam*tf.reduce_sum(tf.square(W1))
-NLL = -tf.reduce_sum(y_*tf.log(y)+decay_penalty)
-
-train_step = tf.train.GradientDescentOptimizer(0.005).minimize(NLL)
-
-init = tf.initialize_all_variables()
-sess = tf.Session()
-sess.run(init)
-
-correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(y_,1))
-accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-test_x, test_y = get_test(M)
-
-
-def do_train(data, bsize=10):
-    for i in range(1000):
-        #print i  
-        names, training_batch, training_outputs = load_fileset(
+def do_train(data, bsize=4, snapshot_frequency=30):
+    for i in range(100):
+        # load the current batch
+        names, training_batch, training_outputs = face_utils.load_fileset(
             data["training"],
             "training",
-            i * bsize, (i + 1) * bsize
-            )
-        sess.run(train_step, feed_dict={x: batch_xs, y_: batch_ys})
+            i * bsize, (i + 1) * bsize)
+
+        if len(names) == 0:
+            # out of pictures
+            print "out of samples in generation %s" % i
+            break;
+
+
+        sess.run(train_step, feed_dict={
+            inputs: training_batch,
+            expectation: training_outputs
+        })
+
+        if i % snapshot_frequency == 0:
+
+            print "accuracy =", accuracy.eval(
+                session=sess,
+                    feed_dict={
+                inputs: training_batch,
+                expectation: training_outputs   
+            })
+
+            dump_snapshot(i)
+
+    dump_snapshot("FINAL")
+
+def dump_snapshot(i):
+    print "dumping snapshot for generation %s" % i
+
+    snapshot = {}
+    snapshot["W0"] = sess.run(W0)
+    snapshot["W1"] = sess.run(W1)
+    snapshot["b0"] = sess.run(b0)
+    snapshot["b1"] = sess.run(b1)
+    pickle.dump(snapshot,  open("new_snapshot"+str(i)+".pkl", "w"))
+
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 5:
-        print "usage: %s <data_json> <comparison_set> <low k> <high k>" % sys.argv[0]
+    if len(sys.argv) != 2:
+        print "usage: %s <data_json>" % sys.argv[0]
         sys.exit(1)
 
     jsonbody = io.open(sys.argv[1], encoding='utf-8-sig')
     data = json.loads(jsonbody.read())
 
-    comp_set = sys.argv[2]
-    ks = list(range(int(sys.argv[3]), int(sys.argv[4]) + 1))
-
     do_train(data);
-  
+

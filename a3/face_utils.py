@@ -7,8 +7,7 @@ import json
 from scipy.spatial.distance import euclidean
 from scipy.misc import imread
 
-import islice from itertools
-
+from itertools import islice
 
 def ilen(iterator):
     return len(list(iterator))
@@ -39,24 +38,24 @@ def get_sample_files(dataset, subset, batch_low, batch_high):
     """
     for class_index, d in enumerate(dataset):
         subsetDir = os.path.join(d["corpus"], subset)
-        for path in islice(os.listdir(subsetDir), batch_low, batch_high):
+        for path in islice(sorted(os.listdir(subsetDir)), batch_low, batch_high):
             yield os.path.join(subsetDir, path), class_index
 
 
 def load_fileset(dataset, subset, batch_low, batch_high):
+    samplefiles = list(get_sample_files(dataset, subset, batch_low, batch_high))
 
+    # create some empty matricies for inputs / expected outputs
+    output_vector = np.zeros((len(samplefiles), len(dataset)))
     input_vector = np.ndarray(
-        shape=(32 * 32, batch_high - batch_low),
+        shape=(len(samplefiles), 32*32),
         dtype=float)
-    output_vector = np.zeros(len(dataset), batch_high - batch_low);
-
-    samplefiles = list(get_sample_files(dataset, subset), batch_low, batch_high)
 
     for i, (imgpath, class_index) in enumerate(samplefiles):
         img = imread(imgpath, flatten=True).flatten()
-        input_vector[:, i] = img
-        output_vector[class_index, i] = 1;
+        input_vector[i, :] = img
+        output_vector[i, class_index] = 1;
 
-    return samplefiles, data_vector, answer_vector
+    return samplefiles, input_vector, output_vector
 
 
