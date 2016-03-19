@@ -30,6 +30,8 @@ import tensorflow as tf
 
 from caffe_classes import class_names
 
+img_dim = 32
+
 train_x = zeros((1, 227,227,3)).astype(float32)
 train_y = zeros((1, 1000))
 xdim = train_x.shape[1:]
@@ -84,8 +86,8 @@ def conv(input, kernel, biases, k_h, k_w, c_o, s_h, s_w,  padding="VALID", group
     return  tf.reshape(tf.nn.bias_add(conv, biases), conv.get_shape().as_list())
 
 
-
-x = tf.Variable(i)
+#input, used a placeholder
+x = tf.placeholder(tf.float32, [None, img_size**2])
 
 #conv1
 #conv(11, 11, 96, 4, 4, padding='VALID', name='conv1')
