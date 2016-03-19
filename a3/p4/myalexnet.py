@@ -40,9 +40,9 @@ weights = {
     'conv3': tf.Variable(tf.random_normal([3, 3, 256, 384])),
     'conv4': tf.Variable(tf.random_normal([3, 3, 192, 384])),
     'conv5': tf.Variable(tf.random_normal([3, 3, 192, 256])),
-    'fc6': tf.Variable(tf.random_normal([256, 4096])),
-    'fc7': tf.Variable(tf.random_normal([4096, 4096])),
-    'fc8': tf.Variable(tf.random_normal([4096, output_dim]))
+    'fc6': tf.Variable(tf.random_normal([256, 1024])),
+    'fc7': tf.Variable(tf.random_normal([1024, 1024])),
+    'fc8': tf.Variable(tf.random_normal([1024, output_dim]))
 }
 
 biases = {
@@ -51,8 +51,8 @@ biases = {
     'conv3': tf.Variable(tf.random_normal([384])),
     'conv4': tf.Variable(tf.random_normal([384])),
     'conv5': tf.Variable(tf.random_normal([256])),
-    'fc6': tf.Variable(tf.random_normal([4096])),
-    'fc7': tf.Variable(tf.random_normal([4096])),
+    'fc6': tf.Variable(tf.random_normal([1024])),
+    'fc7': tf.Variable(tf.random_normal([1024])),
     'fc8': tf.Variable(tf.random_normal([output_dim]))
 }
 
@@ -194,6 +194,7 @@ fc8 = tf.nn.xw_plus_b(fc7, fc8W, fc8b)
 #prob
 #softmax(name='prob'))
 prediction = tf.nn.softmax(fc8)
+argmax_prediction = tf.argmax(tf.nn.softmax(fc8), 1)
 
 # declare the cost function (negative log likelihood), training step
 network_expected = tf.placeholder(tf.float32, [None, output_dim])
