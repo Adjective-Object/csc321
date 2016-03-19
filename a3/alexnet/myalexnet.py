@@ -86,7 +86,7 @@ def conv(input, kernel, biases, k_h, k_w, c_o, s_h, s_w,  padding="VALID", group
     return  tf.reshape(tf.nn.bias_add(conv, biases), conv.get_shape().as_list())
 
 
-
+#input, used a placeholder
 x = tf.placeholder(tf.float32, [None, img_size**2])
 
 #conv1
