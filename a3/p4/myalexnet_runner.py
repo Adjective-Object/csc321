@@ -14,17 +14,25 @@ from numpy import random
 
 import tensorflow as tf
 
+import pickle
 from myalexnet import *
 
-def train(data, passes=100, bsize=10, snapshot_frequency=50):
+def train_batch(training_batch, training_outputs):
+    for x in range(training_batch.shape[0]):
+        sess.run(train_step, feed_dict={
+            network_input: training_batch[x,:].reshape(1, training_batch.shape[1]),
+            network_expected: training_outputs[x,:].reshape(1, training_outputs.shape[1])
+        })
+   
+
+def train(data, passes=100, bsize=10, snapshot_frequency=100):
     all_train = face_utils.load_fileset_multichannel(data["training"], "training",   0, None, 4096)
     all_test  = face_utils.load_fileset_multichannel(data["training"], "test",       0, None, 4096)
     all_valid = face_utils.load_fileset_multichannel(data["training"], "validation", 0, None, 4096)
-
-    rate = []
-
     # do 100 passes of the training set
-    for passes in range(passes):
+    for p in range(passes):
+        print "pass %4d of %4d" %(p, passes)
+
         i = 0
         while True:
             # load the current batch
@@ -39,34 +47,27 @@ def train(data, passes=100, bsize=10, snapshot_frequency=50):
             if len(names) == 0:
                 break;
 
-            sess.run(train_step, feed_dict={
-                network_input: training_batch,
-                network_expected: training_outputs
-            })
-
-            # evaluate the accuracies on the test, training, and validation sets
-            accs = (
-                evaluate_accuracies(all_train[1], all_train[2]),
-                evaluate_accuracies(all_test[1], all_test[2]),
-                evaluate_accuracies(all_valid[1], all_valid[2]),
-            ) 
-
-            print "test: %4f train: %4f valid: %4f" % accs
-            rate.append(accs)
+            train_batch(training_batch, training_outputs)
 
             if i % snapshot_frequency == 0:
-                dump_snapshot("%04d_%04d" % (passes, i))
+                dump_snapshot("%04d_%04d" % (i, passes))
 
             i += 1
 
     dump_snapshot("FINAL")
 
-    print rate
-    te = plt.plot([r[0] for r in rate], label="test")
-    tr = plt.plot([r[1] for r in rate], label="train")
-    va = plt.plot([r[2] for r in rate], label="validation")
-    plt.legend(loc=4)
-    show()
+
+def dump_snapshot(i):
+    print "dumping snapshot for generation %s" % i
+
+    snapshot = {}
+    for key in net_data.keys():
+        snapshot[key] = [None, None]
+        snapshot[key][0] = sess.run(net_data[key][0])
+        snapshot[key][1] = sess.run(net_data[key][1])
+        
+    pickle.dump(snapshot,  open("new_snapshot"+str(i)+".pkl", "w"))
+
 
 
 def evaluate_accuracies(i, o):
