@@ -1,0 +1,66 @@
+{
+  "training": [
+    {
+      "name": "Gerard Butler",
+      "gender": "male",
+      "corpus": "actors\/processed\/Gerard_Butler"
+    },
+    {
+      "name": "Daniel Radcliffe",
+      "gender": "male",
+      "corpus": "actors\/processed\/Daniel_Radcliffe"
+    },
+    {
+      "name": "Michael Vartan",
+      "gender": "male",
+      "corpus": "actors\/processed\/Michael_Vartan"
+    },
+    {
+      "name": "Angie Harmon",
+      "gender": "female",
+      "corpus": "actresses\/processed\/Angie_Harmon"
+    },
+    {
+      "name": "Lorraine Bracco",
+      "gender": "female",
+      "corpus": "actresses\/processed\/Lorraine_Bracco"
+    },
+    {
+      "name": "Peri Gilpin",
+      "gender": "female",
+      "corpus": "actresses\/processed\/Peri_Gilpin"
+    }
+  ],
+  "comparison": [
+    {
+      "name": "Cary Elwes",
+      "gender": "male",
+      "corpus": "actors\/processed\/Cary_Elwes"
+    },
+    {
+      "name": "Chris Klein",
+      "gender": "male",
+      "corpus": "actors\/processed\/Chris_Klein"
+    },
+    {
+      "name": "Andy Richter",
+      "gender": "male",
+      "corpus": "actors\/processed\/Andy_Richter"
+    },
+    {
+      "name": "Julia Louis-Dreyfus",
+      "gender": "female",
+      "corpus": "actresses\/processed\/Julia_Louis-Dreyfus"
+    },
+    {
+      "name": "Dana Delany",
+      "gender": "female",
+      "corpus": "actresses\/processed\/Dana_Delany"
+    },
+    {
+      "name": "Holly Marie Combs",
+      "gender": "female",
+      "corpus": "actresses\/processed\/Holly_Marie_Combs"
+    }
+  ]
+}
