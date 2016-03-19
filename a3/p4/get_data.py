@@ -11,14 +11,14 @@ import os
 from scipy.ndimage import filters
 import urllib
 import sys
+
 from PIL import Image
+from PIL import ImageFile
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 from threading import Thread
-
 import traceback
 
-thread_ct = 0
-MAX_THREADS = 100
 
 def timeout(func, args=(), kwargs={}, timeout_duration=1, default=None):
     '''From:
@@ -58,7 +58,6 @@ def intensityImg(im):
 def processImage(local_file_in, local_file_out, face_coords, bounds_ratio):
     try:
         img = imread(local_file_in)
-        print img.shape
 
         #TODO image_bounds
         real_height = face_coords[3] - face_coords[1]
@@ -72,14 +71,21 @@ def processImage(local_file_in, local_file_out, face_coords, bounds_ratio):
                     :]
             )
 
-        img_thumb = img_processed.resize((227, 227),
+        img_thumb = img_processed.resize((64, 64),
             resample=Image.BILINEAR)
 
-        img_thumb.save(local_file_out, "png")
+        img_thumb.save(".".join(local_file_out.split(".")[:-1]) + ".png", "png")
+
+        os.remove(local_file_in)
+
     except Exception as e:
         print("error processing %s -> %s %s" % 
             (local_file_in, local_file_out, face_coords))
+
         traceback.print_exc(e)
+        print 
+        print
+
         
 
 
@@ -151,7 +157,7 @@ def doAll(path, localpath):
 
         #load the file with timeout
         timeout(testfile.retrieve, 
-            (url, local_file_full), {}, 0.1)
+            (url, local_file_full), {}, 3)
 
         # on fail, print msg and continue
         if not os.path.isfile(local_file_full):
