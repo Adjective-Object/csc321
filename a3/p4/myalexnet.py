@@ -33,10 +33,6 @@ img_dim = 64
 input_dim = 32 ** 2
 output_dim = 6
 
-
-#input, used a placeholder
-x = tf.placeholder(tf.float32, [None, 64,  64, 3])
-
 # weights and biases
 weights = {
     'conv1': tf.Variable(tf.random_normal([11, 11, 3, 96])),
@@ -46,7 +42,7 @@ weights = {
     'conv5': tf.Variable(tf.random_normal([3, 3, 192, 256])),
     'fc6': tf.Variable(tf.random_normal([9216, 4096])),
     'fc7': tf.Variable(tf.random_normal([4096, 4096])),
-    'fc8': tf.Variable(tf.random_normal([4096, 1000]))
+    'fc8': tf.Variable(tf.random_normal([4096, output_dim]))
 }
 
 biases = {
@@ -57,8 +53,13 @@ biases = {
     'conv5': tf.Variable(tf.random_normal([256])),
     'fc6': tf.Variable(tf.random_normal([4096])),
     'fc7': tf.Variable(tf.random_normal([4096])),
-    'fc8': tf.Variable(tf.random_normal([1000]))
+    'fc8': tf.Variable(tf.random_normal([output_dim]))
 }
+
+
+#input, used a placeholder
+network_input = tf.placeholder(tf.float32, [1, 227 ** 2, 3])
+x = tf.reshape(network_input, [1, 227, 227, 3])
 
 def zipdict(a, b):
     out = {}
@@ -71,6 +72,7 @@ net_data = zipdict(weights, biases)
 
 # convolution 
 def conv(input, kernel, biases, k_h, k_w, c_o, s_h, s_w,  padding="VALID", group=1):
+
     '''From https://github.com/ethereon/caffe-tensorflow
     '''
     c_i = input.get_shape()[-1]
@@ -194,17 +196,18 @@ fc8 = tf.nn.xw_plus_b(fc7, fc8W, fc8b)
 prediction = tf.nn.softmax(fc8)
 
 # declare the cost function (negative log likelihood), training step
-expectation = tf.placeholder(tf.float32, [None, output_dim])
-NLL = -tf.reduce_sum(expectation*tf.log(prediction))
+network_expected = tf.placeholder(tf.float32, [None, output_dim])
+NLL = -tf.reduce_sum(network_expected*tf.log(prediction))
 train_step = tf.train.GradientDescentOptimizer(0.0005).minimize(NLL)
 
 # score the output vs expected output
-correct_prediction = tf.equal(tf.argmax(expectation,1), tf.argmax(prediction,1))
+correct_prediction = tf.equal(tf.argmax(network_expected,1), tf.argmax(prediction,1))
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
 # initialize the session
-init = tf.initialize_all_variables()
-sess = tf.Session()
-sess.run(init)
 
+sess = tf.Session()
+init = tf.initialize_all_variables()
+sess.run(init)
+sess.run(tf.assert_variables_initialized())
 
