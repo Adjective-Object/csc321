@@ -37,11 +37,11 @@ def sampleDirectory(basepath):
 
     # create a subsample of the right size
     numvalues = sum(samplesets.values())
-    body = random.sample(samples, numvalues)
-    if len(body) < numvalues:
+    if len(samples) < numvalues:
         print("not enough values in directory %s" % basepath)
         sys.exit(1)
 
+    body = random.sample(samples, numvalues)
     random.shuffle(body)
 
     # divide up the subsample and copy the files into
