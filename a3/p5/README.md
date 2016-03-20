@@ -1,1 +1,3 @@
-Actor image used: <actor name here>
+Actor image used: Daniel Radcliffe
+
+Image file should be saved locally.
