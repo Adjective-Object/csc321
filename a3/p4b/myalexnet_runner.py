@@ -52,7 +52,7 @@ def train(data, passes=100, bsize=1, snapshot_frequency=100):
 
     print "loading images"
 
-    all_train = face_utils.load_fileset_multichannel(data["training"], "training",   0, 10, 277 ** 2)
+    all_train = face_utils.load_fileset_multichannel(data["training"], "training",   0, 70, 277 ** 2)
     all_test  = face_utils.load_fileset_multichannel(data["training"], "test",       0, None, 277 ** 2)
     all_valid = face_utils.load_fileset_multichannel(data["training"], "validation", 0, None, 277 ** 2)
 
