@@ -121,7 +121,7 @@ conv4 = tf.nn.relu(conv4_in)
 
 
 # initialize this from snapshot if needed
-snapshot = None
+snapshot = None # "new_snapshot_pass_0001.pkl" # None
 if snapshot:
     snapshot = np.load(snapshot)
     outW = tf.Variable(snapshot["outW"])
