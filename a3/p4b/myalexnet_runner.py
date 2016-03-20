@@ -75,7 +75,7 @@ def train(data, passes=100, bsize=1, snapshot_frequency=100):
         if p == (passes - 1):
             dump_snapshot(rates, "_pass_%04d" % (p))
 
-    rates.append(train_batch(all_train, all_test, all_valid, training_batch, training_outputs))
+    rates.append(eval_batch(all_train, all_test, all_valid))
     dump_snapshot(rates, "_FINAL")
 
     print rates
