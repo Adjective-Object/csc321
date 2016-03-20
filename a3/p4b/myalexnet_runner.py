@@ -46,7 +46,8 @@ def eval_batch(all_train, all_test, all_valid):
 
     va = eval_performance(all_valid[1], all_valid[2])
 
-    print (tr, te, va)
+    sys.stdout.write(tr, te, va)
+    sys.stdout.flush()
 
     return (tr, te, va)
 
@@ -54,9 +55,9 @@ def eval_batch(all_train, all_test, all_valid):
 def train(data, passes=100, bsize=1, snapshot_frequency=100):
     global rates
 
-    all_train = face_utils.load_fileset_multichannel(data["training"], "training",   0, None, 4096)
-    all_test  = face_utils.load_fileset_multichannel(data["training"], "test",       0, None, 4096)
-    all_valid = face_utils.load_fileset_multichannel(data["training"], "validation", 0, None, 4096)
+    all_train = face_utils.load_fileset_multichannel(data["training"], "training",   0, None, 277 ** 2)
+    all_test  = face_utils.load_fileset_multichannel(data["training"], "test",       0, None, 277 ** 2)
+    all_valid = face_utils.load_fileset_multichannel(data["training"], "validation", 0, None, 277 ** 2)
 
     # do 100 passes of the training set
     print
@@ -65,22 +66,7 @@ def train(data, passes=100, bsize=1, snapshot_frequency=100):
         sys.stdout.write("\r pass %d of %d [%s%s] training.. " % (p, passes, "#" * pcomp, " " * (30 - pcomp)))
         sys.stdout.flush()
 
-        i = 0
-        while True:
-            # load the current batch
-            names, training_batch, training_outputs = face_utils.load_fileset_multichannel(
-                data["training"],
-                "training",
-                batch_low=i * bsize,
-                batch_high=(i + 1) * bsize,
-                dimension=4096)
-            
-            if len(names) == 0:
-                break;
-
-            train_batch(training_batch, training_outputs)
-
-            i += 1
+        train_batch(all_train[1], all_train[2])
 
         sys.stdout.write("\r pass %d of %d [%s%s] evaluating.." % (p, passes, "#" * pcomp, " " * (30 - pcomp)))
         sys.stdout.flush()
@@ -93,7 +79,6 @@ def train(data, passes=100, bsize=1, snapshot_frequency=100):
     rates.append(train_batch(all_train, all_test, all_valid, training_batch, training_outputs))
     dump_snapshot(rates, "_FINAL")
 
-    print rates
     te = plt.plot([x[0] for x in rates], label="test")
     tr = plt.plot([x[1] for x in rates], label="train")
     va = plt.plot([x[2] for x in rates], label="validation")

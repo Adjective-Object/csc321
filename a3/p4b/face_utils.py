@@ -52,31 +52,14 @@ def load_fileset_multichannel(dataset, subset, batch_low=0, batch_high=None, dim
         dtype=float)
 
     for i, (imgpath, class_index) in enumerate(samplefiles):
-        img = imread(imgpath, mode="RGB").flatten() / 255.0
+        img = imread(imgpath, mode="RGB") / 255.0
+        img = img.flatten()
         img = img - img.mean() / (img.max() - img.min())
         input_vector[i, :] = img
         output_vector[i, class_index] = 1;
 
     # print [s.split("/")[-3] for s, _ in samplefiles]
     # print output_vector
-
-    return samplefiles, input_vector, output_vector
-
-
-def load_fileset(dataset, subset, batch_low=0, batch_high=None, dimension=32*32):
-    samplefiles = list(get_sample_files(dataset, subset, batch_low, batch_high))
-
-    # create some empty matricies for inputs / expected outputs
-    output_vector = np.zeros((len(samplefiles), len(dataset)))
-    input_vector = np.ndarray(
-        shape=(len(samplefiles), dimension),
-        dtype=float)
-
-    for i, (imgpath, class_index) in enumerate(samplefiles):
-        img = imread(imgpath, flatten=True).flatten() / 255.0
-        img = img - img.mean() / (img.max() - img.min())
-        input_vector[i, :] = img
-        output_vector[i, class_index] = 1;
 
     return samplefiles, input_vector, output_vector
 
