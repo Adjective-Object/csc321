@@ -1,0 +1,66 @@
+{
+  "training": [
+    {
+      "name": "Gerard Butler",
+      "gender": "male",
+      "corpus": "actors\/processed\/Gerard_Butler"
+    },
+    {
+      "name": "Daniel Radcliffe",
+      "gender": "male",
+      "corpus": "actors\/processed\/Daniel_Radcliffe"
+    },
+    {
+      "name": "Michael Vartan",
+      "gender": "male",
+      "corpus": "actors\/processed\/Michael_Vartan"
+    },
+    {
+      "name": "Angie Harmon",
+      "gender": "female",
+      "corpus": "actresses\/processed\/Angie_Harmon"
+    },
+    {
+      "name": "Lorraine Bracco",
+      "gender": "female",
+      "corpus": "actresses\/processed\/Lorraine_Bracco"
+    },
+    {
+      "name": "Peri Gilpin",
+      "gender": "female",
+      "corpus": "actresses\/processed\/Peri_Gilpin"
+    }
+  ],
+  "comparison": [
+    {
+      "name": "Gerard Butler",
+      "gender": "male",
+      "corpus": "actors\/processed\/Gerard_Butler"
+    },
+    {
+      "name": "Daniel Radcliffe",
+      "gender": "male",
+      "corpus": "actors\/processed\/Daniel_Radcliffe"
+    },
+    {
+      "name": "Michael Vartan",
+      "gender": "male",
+      "corpus": "actors\/processed\/Michael_Vartan"
+    },
+    {
+      "name": "Angie Harmon",
+      "gender": "female",
+      "corpus": "actresses\/processed\/Angie_Harmon"
+    },
+    {
+      "name": "Lorraine Bracco",
+      "gender": "female",
+      "corpus": "actresses\/processed\/Lorraine_Bracco"
+    },
+    {
+      "name": "Peri Gilpin",
+      "gender": "female",
+      "corpus": "actresses\/processed\/Peri_Gilpin"
+    }
+  ]
+}
