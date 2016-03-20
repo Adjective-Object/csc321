@@ -24,7 +24,7 @@ def eval_performance(inset, outset):
     num = 0.0
     for i in range(inset.shape[0]):
         num += sess.run(accuracy, feed_dict={
-            x: inset[i,:].reshape(1, inset.shape[1]),
+            x: inset[i,:].reshape(1, 277, 277, 3),
             y: outset[i,:].reshape(1, outset.shape[1])
         })
     return float(num) / float(inset.shape[0])
@@ -41,13 +41,8 @@ def train_batch(training_batch, training_outputs):
 
 def eval_batch(all_train, all_test, all_valid):
     tr = eval_performance(all_train[1], all_train[2])
-
     te = eval_performance(all_test[1], all_test[2])
-
     va = eval_performance(all_valid[1], all_valid[2])
-
-    sys.stdout.write(tr, te, va)
-    sys.stdout.flush()
 
     return (tr, te, va)
 
@@ -55,7 +50,9 @@ def eval_batch(all_train, all_test, all_valid):
 def train(data, passes=100, bsize=1, snapshot_frequency=100):
     global rates
 
-    all_train = face_utils.load_fileset_multichannel(data["training"], "training",   0, None, 277 ** 2)
+    print "loading images"
+
+    all_train = face_utils.load_fileset_multichannel(data["training"], "training",   0, 10, 277 ** 2)
     all_test  = face_utils.load_fileset_multichannel(data["training"], "test",       0, None, 277 ** 2)
     all_valid = face_utils.load_fileset_multichannel(data["training"], "validation", 0, None, 277 ** 2)
 
@@ -79,6 +76,7 @@ def train(data, passes=100, bsize=1, snapshot_frequency=100):
     rates.append(train_batch(all_train, all_test, all_valid, training_batch, training_outputs))
     dump_snapshot(rates, "_FINAL")
 
+    print rates
     te = plt.plot([x[0] for x in rates], label="test")
     tr = plt.plot([x[1] for x in rates], label="train")
     va = plt.plot([x[2] for x in rates], label="validation")
@@ -88,11 +86,8 @@ def train(data, passes=100, bsize=1, snapshot_frequency=100):
 
 def dump_snapshot(rates, i):
     snapshot = {}
-    for key in net_data.keys():
-        snapshot[key] = [None, None]
-        snapshot[key][0] = sess.run(net_data[key][0])
-        snapshot[key][1] = sess.run(net_data[key][1])
-    
+    snapshot["outW"] = sess.run(outW)
+    snapshot["outb"] = sess.run(outb)
     snapshot["rates"] = rates
 
     pickle.dump(snapshot,  open("new_snapshot"+str(i)+".pkl", "w"))

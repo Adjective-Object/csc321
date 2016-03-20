@@ -119,10 +119,19 @@ conv4b = tf.constant(net_data["conv4"][1])
 conv4_in = conv(conv3, conv4W, conv4b, k_h, k_w, c_o, s_h, s_w, padding="SAME", group=group)
 conv4 = tf.nn.relu(conv4_in)
 
-#out
-#fc(6, relu=False, name='fc8')
-outW = tf.Variable(tf.random_normal([16 * 16 * 384, 6], stddev=0.01))
-outb = tf.Variable(tf.random_normal([6], stddev=0.01));
+
+# initialize this from snapshot if needed
+snapshot = None
+if snapshot:
+    snapshot = np.load(snapshot)
+    outW = tf.Variable(snapshot["outW"])
+    outb = tf.Variable(snapshot["outb"])
+else:
+    #out
+    #fc(6, relu=False, name='fc8')
+    outW = tf.Variable(tf.random_normal([16 * 16 * 384, 6], stddev=0.01))
+    outb = tf.Variable(tf.random_normal([6], stddev=0.01));
+
 out = tf.nn.xw_plus_b(tf.reshape(conv4, [1, 384 * 16 * 16]), outW, outb)
 
 #prob
