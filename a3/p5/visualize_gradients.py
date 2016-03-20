@@ -9,8 +9,8 @@ import os, sys
 from myalexnet import *
 
 if __name__ == "__main__":
-    # if len(sys.argv) != 3:
-    #     print "usage: %s <image file> <output directory>" % sys.argv[0]
+	if len(sys.argv) != 4:
+		print "usage: %s <image file> <label int> <output filename>" % sys.argv[0]
     
     img = imread(sys.argv[1])
     img_in = img.reshape(1, 277,277, 3)
@@ -32,5 +32,5 @@ if __name__ == "__main__":
     imsave(
         os.path.join(sys.argv[3]),
         gradient.reshape(277,277,3),
-        cmap=cm.ocean,
+        cmap=cm.cubehelix,
         format="png")
