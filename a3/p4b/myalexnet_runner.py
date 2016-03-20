@@ -71,7 +71,9 @@ def train(data, passes=100, bsize=1, snapshot_frequency=100):
 
         sys.stdout.write("\r pass %d of %d [%s%s] dumping..   " % (p, passes, "#" * pcomp, " " * (30 - pcomp)))
         sys.stdout.flush()
-        dump_snapshot(rates, "_pass_%04d" % (p))
+        # ONLY dump the last snapshot
+        if p == (passes - 1):
+            dump_snapshot(rates, "_pass_%04d" % (p))
 
     rates.append(train_batch(all_train, all_test, all_valid, training_batch, training_outputs))
     dump_snapshot(rates, "_FINAL")
