@@ -28,46 +28,51 @@ from numpy import random
 import tensorflow as tf
 
 
+def loadVariables(pth):
+    global current_generation
+    global rates
+
+    o = np.load(pth).item()
+    keys = list(o.keys())
+    for key in keys:
+        if key != 'rates':
+            '''
+            print key
+            print type(o[key])
+            print type(o[key][0])
+            print type(o[key][1])
+            '''
+            o[key][0] = tf.Variable(o[key][0])
+            o[key][1] = tf.Variable(o[key][1])
+        else:
+            rates = o[key]
+            del o[key]
+
+    try:
+        current_generation = int(pth.split("_")[-1].split('.')[0]) + 1
+    except:
+        current_generation = 0
+    return o
+
+
+
+
+
+
 # parameters
-img_dim = 64
-input_dim = 32 ** 2
+img_dim = 227
+input_dim = img_dim ** 2 * 3
 output_dim = 6
 
-# weights and biases
-weights = {
-    'conv1': tf.Variable(tf.random_normal([11, 11, 3, 96])),
-    'conv2': tf.Variable(tf.random_normal([5, 5, 48, 256])),
-    'conv3': tf.Variable(tf.random_normal([3, 3, 256, 384])),
-    'conv4': tf.Variable(tf.random_normal([3, 3, 192, 384])),
-    'conv5': tf.Variable(tf.random_normal([3, 3, 192, 256])),
-    'fc6': tf.Variable(tf.random_normal([256, 1024])),
-    'fc7': tf.Variable(tf.random_normal([1024, 1024])),
-    'fc8': tf.Variable(tf.random_normal([1024, output_dim]))
-}
-
-biases = {
-    'conv1': tf.Variable(tf.random_normal([96])),
-    'conv2': tf.Variable(tf.random_normal([256])),
-    'conv3': tf.Variable(tf.random_normal([384])),
-    'conv4': tf.Variable(tf.random_normal([384])),
-    'conv5': tf.Variable(tf.random_normal([256])),
-    'fc6': tf.Variable(tf.random_normal([1024])),
-    'fc7': tf.Variable(tf.random_normal([1024])),
-    'fc8': tf.Variable(tf.random_normal([output_dim]))
-}
-
+pklPath = "bvlc_alexnet.npy"
+print "recovering session " + pklPath
+net_data = loadVariables(pklPath)
 
 #input, used a placeholder
-network_input = tf.placeholder(tf.float32, [1, 64 ** 2 * 3])
-x = tf.reshape(network_input, [1, 64, 64, 3])
+network_input = tf.placeholder(tf.float32, [1, input_dim])
+x = tf.reshape(network_input, [1, img_dim, img_dim, 3])
 
-def zipdict(a, b):
-    out = {}
-    for key in a.keys():
-        out[key] = (a[key], b[key])
-    return out
 
-net_data = zipdict(weights, biases)
 
 
 # convolution 
@@ -194,7 +199,7 @@ fc8 = tf.nn.xw_plus_b(fc7, fc8W, fc8b)
 #prob
 #softmax(name='prob'))
 prediction = tf.nn.softmax(fc8)
-argmax_prediction = tf.argmax(tf.nn.softmax(fc8), 1)
+argmax_prediction = tf.argmax(prediction, 1)
 
 # declare the cost function (negative log likelihood), training step
 network_expected = tf.placeholder(tf.float32, [None, output_dim])

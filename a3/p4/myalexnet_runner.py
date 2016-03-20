@@ -15,18 +15,23 @@ from numpy import random
 import tensorflow as tf
 
 import pickle
+
+current_generation = 0
+rates = []
 from myalexnet import *
 
 def eval_performance(inset, outset):
     num = 0
     for x in range(inset.shape[0]):
-        if argmax(outset) == argmax_prediction.eval(
+        prediction = argmax_prediction.eval(
             session=sess, 
             feed_dict={
                 network_input: inset[x, :].reshape(1, inset.shape[1])
-            }):
+            })
+        
+        if argmax(outset[x,:]) == prediction:
             num += 1
-    return float(num) / inset.shape[0]
+    return float(num) / float(inset.shape[0])
 
 def train_batch(training_batch, training_outputs):
     for x in range(training_batch.shape[0]):
@@ -39,24 +44,27 @@ def train_batch(training_batch, training_outputs):
         })
 
 def eval_batch(all_train, all_test, all_valid):
-    tr = eval_performance(all_train[1], all_train[1]),
+    tr = eval_performance(all_train[1], all_train[2])
 
-    te = eval_performance(all_test[1], all_test[1]),
+    te = eval_performance(all_test[1], all_test[2])
 
-    va = eval_performance(all_valid[1], all_valid[1])
+    va = eval_performance(all_valid[1], all_valid[2])
 
-    return tr, te, va
+    print (tr, te, va)
+
+    return (tr, te, va)
 
 
 def train(data, passes=100, bsize=1, snapshot_frequency=100):
+    global rates
+
     all_train = face_utils.load_fileset_multichannel(data["training"], "training",   0, None, 4096)
     all_test  = face_utils.load_fileset_multichannel(data["training"], "test",       0, None, 4096)
     all_valid = face_utils.load_fileset_multichannel(data["training"], "validation", 0, None, 4096)
 
-   # do 100 passes of the training set
-    rates = []
+    # do 100 passes of the training set
     print
-    for p in range(passes):
+    for p in range(current_generation, passes):
         pcomp = int(float(p)/passes * 30)
         sys.stdout.write("\r pass %d of %d [%s%s] training.. " % (p, passes, "#" * pcomp, " " * (30 - pcomp)))
         sys.stdout.flush()
@@ -103,9 +111,9 @@ def dump_snapshot(rates, i):
         snapshot[key] = [None, None]
         snapshot[key][0] = sess.run(net_data[key][0])
         snapshot[key][1] = sess.run(net_data[key][1])
-
+    
     snapshot["rates"] = rates
-        
+
     pickle.dump(snapshot,  open("new_snapshot"+str(i)+".pkl", "w"))
 
 

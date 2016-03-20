@@ -21,7 +21,7 @@ network_expected = tf.placeholder(tf.float32, [None, n_classes])
 
 # initialize weights and biases
 weights = {
-    'wc1': tf.Variable(tf.random_normal([3, 3, 3, 64])),
+    'wc1': tf.Variable(tf.random_normal([3, 3, 1, 64])),
     'wc2': tf.Variable(tf.random_normal([3, 3, 64, 128])),
     'wc3': tf.Variable(tf.random_normal([3, 3, 128, 256])),
     'wd1': tf.Variable(tf.random_normal([4*256, 1024])),
@@ -60,8 +60,7 @@ def norm(name, l_input, lsize=4):
 #####################
 
 # Reshape input picture
-x = tf.reshape(network_input, shape=[-1, img_size, img_size, 3])
-
+x = tf.reshape(network_input, shape=[-1, img_size, img_size, 1])
 
 # Convolution Layer1
 conv1 = conv2d('conv1', x, weights['wc1'], biases['bc1'])
@@ -104,7 +103,7 @@ prediction = out
 
 # declare the cost function (negative log likelihood), training step
 NLL = -tf.reduce_sum(network_expected * tf.log(prediction))
-train_step = tf.train.GradientDescentOptimizer(0.0005).minimize(NLL)
+train_step = tf.train.GradientDescentOptimizer(0.005).minimize(NLL)
 
 # Evaluate model
 num_correct = tf.equal(
