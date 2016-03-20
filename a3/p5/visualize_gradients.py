@@ -26,7 +26,7 @@ if __name__ == "__main__":
     })[0]
 
     print "min:", np.min(gradient), "max:", np.max(gradient)
-    gradient = (gradient - np.min(gradient)) / (np.max(gradient) - np.min(gradient)) * 255
+    gradient = (gradient - np.min(gradient)) / (np.max(gradient) - np.min(gradient))
     print "min:", np.min(gradient), "max:", np.max(gradient)
 
     imsave(
