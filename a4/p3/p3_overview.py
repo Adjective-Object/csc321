@@ -6,16 +6,16 @@ np.random.seed(555)
 random.seed(555)
 
 def normalize(arr):
-   return arr / (arr.max() - arr.min())
+   return ((arr - arr.min()) / (arr.max() - arr.min()) - 0.5) * 2
 
-def inspect(arr, highlight_indexes, threshold=0.3):
+def inspect(arr, highlight_indexes, threshold=0.5):
     # create a graph with newline and space highlighted along border
     arr = normalize(arr)
     highlighted_numbers = []
     for x in range(arr.shape[1]):
         for ind in highlight_indexes:
             if abs(arr[ind,x]) > threshold:
-                print "input %03d -> implies -> output %03d" % (x, ind)
+                print "input %03d (weight %s)-> implies -> output %03d" % (x, arr[ind,x], ind)
                 highlighted_numbers.append(x)
 
     arr_graph = np.pad(arr,
@@ -52,12 +52,15 @@ if __name__ == "__main__":
         ]]
 
 
+    print
     print "Wxh (looking for things that ':' causes"
     colon_features = inspect(Wxh.T, [char_to_ix[':']])
 
+    print
     print "Whh.T (looking for how the featues triggered by ':' are pushed through history"
     next_time_step_colon_features = inspect(Whh.T, colon_features)
 
+    print
     print "Why (looking for features that directly cause newlines and spaces)' '"
     inds = inspect(Why, [char_to_ix['\n'], char_to_ix[' ']])
 

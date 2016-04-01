@@ -1,2 +1,36 @@
+Neuron 43:
+    goes low when there is a capital character at the beginning of a line, and
+    stays low until it a newline is outputted
+
+    Likely keeping track of if we are in a character name
+
+    Doesn't seem to have an effect on adding spaces or newlines after ':',
+    might be useful for part 4
+    
+
+Neuron 73:
+    Goes high at the beginning of every line, and stays high when reading
+    capital characters
+
+    Goes low immediately following a colon, and it is attached to the
+    newline character as an output, so it is likely a cause of newlining
+
+Neuron 100:
+    Goes high immediately following a colon, and has a high weight with both
+    newline and space
+
+Neuron 187:
+    Goes low on strings of capital letters not beginning a line. This behavior
+    is likely keeping track of if we are in a title.
+
+    Goes high on the same time step as printing a colon, and is triggered by 
+    a colon being high on the previous time step
+
+    Also highly connected to newline, so its likely causing newlines following
+    colons
+ 
+
+ 
+
 -Goes negative when it sees US and back to positive to when it sees a colon
 	-Looking for names

@@ -22,6 +22,10 @@ def color_from_activation(weight):
 
     return "#%02x%02x%02x" % tuple(mix)
 
+
+def normalize(arr):
+   return (arr - arr.min()) / (arr.max() - arr.min()) + arr.min() / 2
+
 def visualize_sample(h, neuron, seed_ix, n):
     """ 
     sample a sequence of integers from the model 
@@ -46,7 +50,7 @@ def visualize_sample(h, neuron, seed_ix, n):
         if char == '\n':
             char = '&nbsp;<br/>'
 
-        color = color_from_activation(h[neuron] / (h.max() - h.min()))
+        color = color_from_activation(normalize(h)[neuron])
         sys.stdout.write(
             "<span style='background-color: %s;'>%s</span>" % 
             (color, char))
