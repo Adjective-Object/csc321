@@ -9,15 +9,28 @@ import os, sys
 from myalexnet import *
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print "usage: %s <image file>" % sys.argv[0]
+	if len(sys.argv) != 4:
+		print "usage: %s <image file> <label int> <output filename>" % sys.argv[0]
     
     img = imread(sys.argv[1])
     img_in = img.reshape(1, 277,277, 3)
-    one_hot = np.array([[np.float32(0) for i in range(6)]])
-    one_hot[0][1] = np.float32(1)
-    out_tensor = sess.run(out, feed_dict={
-                    x: img_in,
-                    y: one_hot
-                })
-    print tf.gradients(out, x)
+
+    radcliffe = np.array([[np.float32(0) for i in range(6)]])
+    radcliffe[0][int(sys.argv[2])] = np.float32(1)
+
+    dout_dimg = tf.gradients(NLL, x) 
+
+    gradient = sess.run(dout_dimg, feed_dict = {
+        x: img_in,
+        y: radcliffe
+    })[0]
+
+    print "min:", np.min(gradient), "max:", np.max(gradient)
+    gradient = (gradient - np.min(gradient)) / (np.max(gradient) - np.min(gradient))
+    print "min:", np.min(gradient), "max:", np.max(gradient)
+
+    imsave(
+        os.path.join(sys.argv[3]),
+        gradient.reshape(277,277,3),
+        cmap=cm.cubehelix,
+        format="png")
