@@ -1,0 +1,4 @@
+history → history_weight_layer ⬎
+      x → input_weight_layer → sum layer → predicted_y
+
+
