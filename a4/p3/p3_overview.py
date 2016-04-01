@@ -6,15 +6,15 @@ np.random.seed(555)
 random.seed(555)
 
 def normalize(arr):
-   return (arr - arr.min()) / (arr.max() - arr.min())
+   return arr / (arr.max() - arr.min())
 
-def inspect(arr, highlight_indexes, threshold=0.7):
+def inspect(arr, highlight_indexes, threshold=0.3):
     # create a graph with newline and space highlighted along border
     arr = normalize(arr)
     highlighted_numbers = []
     for x in range(arr.shape[1]):
         for ind in highlight_indexes:
-            if arr[ind,x] > threshold:
+            if abs(arr[ind,x]) > threshold:
                 print "input %03d -> implies -> output %03d" % (x, ind)
                 highlighted_numbers.append(x)
 

@@ -1,0 +1,2 @@
+-Goes negative when it sees US and back to positive to when it sees a colon
+	-Looking for names
