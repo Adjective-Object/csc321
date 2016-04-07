@@ -18,5 +18,9 @@ $(local_file):
 p1/sample_output.txt: p1/p1.py
 	$(python) $< > $@
 
+# P2 OUTPUT
+p2/p2_output.txt:
+	python p2/p2.py > $@
+
 
 

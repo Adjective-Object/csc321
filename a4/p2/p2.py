@@ -4,24 +4,33 @@ import random
 np.random.seed(555)
 random.seed(555)
 
-def preseed(h, seed_string):
-    # history of network is entirely based on history to first layer
-    # (Whh, Wxh, Why, xs fixed)
-    
-    # We can calculate gradient of cost of all timesteps wrt
-    # the output, 
-    for prev, cur in zip(seed_string, seed_string[1:]):
-        expected_output = 
-        maximize_ix = 
 
+def preseed(seed_ixs):
+    """ 
+    sample a sequence of integers from the model 
+    h is memory state, seed_ix is seed letter for first time step
+    """
+
+    h = np.zeros(bh.shape)
+
+    for seed_ix in seed_ixs:
+        # generate input vector
+        x = np.zeros((vocab_size, 1))
+        x[seed_ix] = 1
+
+        # forward pass of the neural net
+        h = np.tanh(np.dot(Wxh, x) + np.dot(Whh, h) + bh)
+        y = np.dot(Why, h) + by
+        p = np.exp(y) / np.sum(np.exp(y))
+        ix = np.random.choice(range(vocab_size), p=p.ravel())
     return h
-
 
 def sample(h, seed_ix, n):
     """ 
     sample a sequence of integers from the model 
     h is memory state, seed_ix is seed letter for first time step
     """
+
     x = np.zeros((vocab_size, 1))
     x[seed_ix] = 1
     ixes = []
@@ -59,21 +68,23 @@ if __name__ == "__main__":
             "char_to_ix", "ix_to_char"
         ]]
 
+    def str2ixs(toConvert):
+        return [char_to_ix[c] for c in toConvert]
 
-    for temperature in (x / 100.0 for x in range(0,100)):
+
+    for temperature in [1.0]:
         print "######################"
         print "# TEMPERATUE = %0.5f #" % temperature
         print "######################"
 
         for sample_no in range(10):
             print "## BEGIN SAMPLE %02d" % sample_no
-            # get first char as weighted random choice
-            initial_char = random.choice(chars)
+            
+            seedString = str2ixs("SEEDSTRING")
+            memory_state = preseed(seedString[:-1])
 
-            #initial memstate is null
-            memory_state = np.zeros(bh.shape)
-
-            hallucination = sample(memory_state, char_to_ix[initial_char], 300)
+            hallucination = seedString+ sample(memory_state, seedString[-1], 300)
+            
             print "".join([ix_to_char[index] for index in hallucination])
             
 
