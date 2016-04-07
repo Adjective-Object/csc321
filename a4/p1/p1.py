@@ -24,7 +24,7 @@ def sample(h, seed_ix, n):
 
 if __name__ == "__main__":
     # load the file and unpak the weights
-    snapshot = np.load(open("dataset/char-rnn-snapshot.npz"))
+    snapshot = np.load(open("../dataset/char-rnn-snapshot.npz"))
     Wxh = snapshot["Wxh"] 
     Whh = snapshot["Whh"]
     Why = snapshot["Why"]
@@ -41,7 +41,6 @@ if __name__ == "__main__":
             "char_to_ix", "ix_to_char"
         ]]
 
-
     for temperature in (x / 100.0 for x in range(0,100)):
         print "######################"
         print "# TEMPERATUE = %0.5f #" % temperature
@@ -56,7 +55,6 @@ if __name__ == "__main__":
             memory_state = np.zeros(bh.shape)
 
             hallucination = sample(memory_state, char_to_ix[initial_char], 300)
-            print "".join([ix_to_char[index] for index in hallucination])
-            
 
+            print "".join([ix_to_char[index] for index in hallucination])
 
