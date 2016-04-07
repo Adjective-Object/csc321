@@ -4,17 +4,17 @@ import random
 np.random.seed(555)
 random.seed(555)
 
-def preseed(h, seed_string):
-    # history of network is entirely based on history to first layer
-    # (Whh, Wxh, Why, xs fixed)
-    
-    # We can calculate gradient of cost of all timesteps wrt
-    # the output, 
-    for prev, cur in zip(seed_string, seed_string[1:]):
-        expected_output = 
-        maximize_ix = 
-
-    return h
+# def preseed(h, seed_string):
+#     # history of network is entirely based on history to first layer
+#     # (Whh, Wxh, Why, xs fixed)
+#     
+#     # We can calculate gradient of cost of all timesteps wrt
+#     # the output, 
+#     for prev, cur in zip(seed_string, seed_string[1:]):
+#         expected_output = 
+#         maximize_ix = 
+# 
+#     return h
 
 
 def sample(h, seed_ix, n):
@@ -42,7 +42,7 @@ def sample(h, seed_ix, n):
 
 if __name__ == "__main__":
     # load the file and unpak the weights
-    snapshot = np.load(open("dataset/char-rnn-snapshot.npz"))
+    snapshot = np.load(open("../dataset/char-rnn-snapshot.npz"))
     Wxh = snapshot["Wxh"] 
     Whh = snapshot["Whh"]
     Why = snapshot["Why"]
