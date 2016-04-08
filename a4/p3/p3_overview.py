@@ -68,5 +68,10 @@ if __name__ == "__main__":
     print "features trig by ':' on t+1:           ", next_time_step_colon_features
     print "things that cause newlines and spaces: ", inds
 
+    print
+    print '":"  ', char_to_ix[':']
+    print '" "  ', char_to_ix[' ']
+    print '"\\n"', char_to_ix['\n']
+
 
 

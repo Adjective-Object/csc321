@@ -24,7 +24,7 @@ def sample(h, seed_ix, n):
 
 if __name__ == "__main__":
     # load the file and unpak the weights
-    snapshot = np.load(open("../dataset/char-rnn-snapshot.npz"))
+    snapshot = np.load(open("dataset/char-rnn-snapshot.npz"))
     Wxh = snapshot["Wxh"] 
     Whh = snapshot["Whh"]
     Why = snapshot["Why"]
